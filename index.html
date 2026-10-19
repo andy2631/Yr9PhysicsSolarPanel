@@ -838,9 +838,19 @@ P = VI
 </div>
 
 <p>
-Each representative panel operates at approximately
-<strong>36.4 V at its maximum-power point</strong> when sufficient
-sunlight is available.
+In this model, panel voltage changes with irradiance:
+</p>
+
+<div class="equation">
+V<sub>panel</sub> =
+V<sub>MPP,ref</sub> ×
+clamp[0.55, 1.03]
+(1 + 0.07 ln(G / 1000))
+</div>
+
+<p>
+This keeps voltage variation modest while allowing realistic voltage
+drop at lower sunlight. Panel current then follows from P = VI.
 </p>
 
 <div class="equation">
@@ -933,8 +943,8 @@ P<sub>water</sub> / (ρgh)
     <td>2 identical panels</td>
   </tr>
   <tr>
-    <td>Representative panel operating voltage</td>
-    <td>36.4 V per panel</td>
+    <td>Representative panel voltage at 1000 W/m²</td>
+    <td>36.4 V per panel (then adjusted by ln irradiance model)</td>
   </tr>
   <tr>
     <td>Total panel area</td>
@@ -993,6 +1003,10 @@ const WATER_DENSITY = 1000;       // kg/m³
 const GRAVITY = 9.81;             // N/kg
 const TROUGH_CAPACITY = 2000;     // L
 const PANEL_MPP_VOLTAGE = 36.4;   // V per representative panel
+const STC_IRRADIANCE = 1000;      // W/m² reference irradiance
+const PANEL_VOLTAGE_IRRADIANCE_COEFFICIENT = 0.07;
+const MIN_PANEL_VOLTAGE_FACTOR = 0.55;
+const MAX_PANEL_VOLTAGE_FACTOR = 1.03;
 const NUMBER_OF_PANELS = 2;
 const MINIMUM_PUMP_INPUT = 60;    // W after controller losses
 
@@ -1059,12 +1073,26 @@ function calculatePhysics(){
   /*
     At zero sunlight, voltage and current are shown as zero.
 
-    Otherwise the educational model approximates each panel as
-    operating at its representative maximum-power voltage.
+    With increasing irradiance, panel current rises strongly while panel
+    operating voltage rises more gently. This log-style relationship
+    approximates real panel behaviour near maximum power point.
   */
+  const irradianceRatio =
+    state.radiation /
+    STC_IRRADIANCE;
+
   const panelVoltage =
-    pvPower > 0
-      ? PANEL_MPP_VOLTAGE
+    irradianceRatio > 0
+      ? PANEL_MPP_VOLTAGE *
+        Math.max(
+          MIN_PANEL_VOLTAGE_FACTOR,
+          Math.min(
+            MAX_PANEL_VOLTAGE_FACTOR,
+            1 +
+            PANEL_VOLTAGE_IRRADIANCE_COEFFICIENT *
+            Math.log(irradianceRatio)
+          )
+        )
       : 0;
 
 
@@ -1668,13 +1696,28 @@ function refresh(){
     </div>
 
 
-    <strong>3. Power and current from each panel</strong>
+    <strong>3. Power, voltage and current from each panel</strong>
 
     <div class="equation">
       P<sub>panel</sub> =
       ${format(p.pvPower,1)} W ÷ 2
       =
       ${format(p.powerPerPanel,1)} W
+      <br>
+
+      V<sub>panel</sub> =
+      ${format(PANEL_MPP_VOLTAGE,1)} V
+      ×
+      clamp[${format(MIN_PANEL_VOLTAGE_FACTOR,2)},
+      ${format(MAX_PANEL_VOLTAGE_FACTOR,2)}]
+      (
+      1 + ${format(PANEL_VOLTAGE_IRRADIANCE_COEFFICIENT,2)}
+      ln(${format(state.radiation,0)} / ${format(STC_IRRADIANCE,0)})
+      )
+      <br>
+
+      =
+      ${format(p.panelVoltage,1)} V
       <br>
 
       I<sub>panel</sub> =
@@ -2360,7 +2403,8 @@ TEACHER NOTES
 
 • Two identical photovoltaic panels are used.
 • The total selected panel area is divided equally between them.
-• Each panel is represented by a maximum-power voltage of 36.4 V.
+• Panel voltage follows a logarithmic irradiance model around a
+  36.4 V reference at 1000 W/m², clamped to realistic limits.
 • Panel output power is calculated using irradiance, area and
   selected panel efficiency.
 • Current is calculated using I = P/V.
@@ -2387,6 +2431,9 @@ PPV = panel efficiency × Psolar
 
 Electrical power:
 P = VI
+
+Panel-voltage model:
+Vpanel = VMPP,ref × clamp[minFactor,maxFactor](1 + k ln(G/1000))
 
 Current:
 I = P/V
@@ -2425,6 +2472,8 @@ resizing changes only the drawing, never the physical calculations.
 ------------------------
 
 Change PANEL_MPP_VOLTAGE to use a different representative panel.
+Adjust PANEL_VOLTAGE_IRRADIANCE_COEFFICIENT to change how strongly
+voltage responds to irradiance.
 
 Change MINIMUM_PUMP_INPUT to alter the controller/pump start threshold.
 
