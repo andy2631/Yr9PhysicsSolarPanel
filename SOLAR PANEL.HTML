@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Year 9 Physics | Solar Bore Pump Simulator</title>
+
+<style>
+:root{
+  --background:#071521;
+  --panel:#102a3d;
+  --panel-light:#173b52;
+  --text:#f7fbff;
+  --muted:#bfd1dc;
+  --border:#3a6076;
+  --yellow:#ffd447;
+  --purple:#8d7cf6;
+  --blue:#39bce8;
+  --green:#68df94;
+  --orange:#ffad5c;
+  --red:#ff7777;
+  --teal:#55d6c2;
+}
+
+*{box-sizing:border-box}
+
+html{color-scheme:dark}
+
+body{
+  margin:0;
+  color:var(--text);
+  background:linear-gradient(135deg,#06111c,#0c2233);
+  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+
+header{
+  padding:22px clamp(16px,4vw,52px);
+  background:#091b29;
+  border-bottom:1px solid var(--border);
+}
+
+h1{
+  margin:0;
+  font-size:clamp(1.7rem,4vw,2.6rem);
+}
+
+h2,h3{margin-top:0}
+
+header p{
+  color:var(--muted);
+  margin:.4rem 0 0;
+}
+
+main{
+  max-width:1500px;
+  margin:auto;
+  padding:20px;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:minmax(310px,410px) 1fr;
+  gap:20px;
+}
+
+.card{
+  padding:18px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--panel);
+  box-shadow:0 10px 30px #0004;
+}
+
+.control{margin-bottom:21px}
+
+.controlTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:7px;
+}
+
+.value{
+  color:var(--yellow);
+  font-weight:850;
+  white-space:nowrap;
+}
+
+.inputRow{
+  display:grid;
+  grid-template-columns:1fr 94px;
+  gap:9px;
+}
+
+input,select,button{font:inherit}
+
+input[type="range"]{
+  width:100%;
+  accent-color:var(--yellow);
+}
+
+input[type="number"],select{
+  width:100%;
+  min-width:0;
+  padding:8px;
+  color:white;
+  background:#071924;
+  border:1px solid #698a9e;
+  border-radius:8px;
+}
+
+button{
+  padding:10px 14px;
+  color:#fff;
+  background:#217fbe;
+  border:0;
+  border-radius:9px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+button:hover{filter:brightness(1.12)}
+button.secondary{background:#405c6d}
+button.danger{background:#95474e}
+
+button.active{
+  color:#051720;
+  background:var(--green);
+  box-shadow:0 0 0 3px white inset;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible{
+  outline:3px solid white;
+  outline-offset:3px;
+}
+
+small,.muted{color:var(--muted)}
+
+.buttonRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.connectionChoices{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.connectionButton{
+  padding:13px 8px;
+  background:#294a5e;
+  border:2px solid transparent;
+}
+
+.connectionButton.selected{
+  color:#061720;
+  background:var(--yellow);
+  border-color:white;
+}
+
+.status{
+  margin:12px 0;
+  padding:10px 12px;
+  background:#071924;
+  border-radius:9px;
+  font-weight:850;
+}
+
+.running{color:var(--green)}
+.paused{color:#ffd070}
+
+.canvasCard{
+  padding:0;
+  overflow:hidden;
+}
+
+canvas{
+  display:block;
+  width:100%;
+  height:510px;
+  background:#a9dcf4;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:11px;
+  margin-top:20px;
+}
+
+.stat{
+  min-width:0;
+  padding:15px;
+  background:var(--panel-light);
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+
+.statLabel{
+  color:var(--muted);
+  font-size:.87rem;
+}
+
+.statNumber{
+  margin:4px 0;
+  font-size:clamp(1.25rem,2.6vw,1.86rem);
+  font-weight:900;
+  overflow-wrap:anywhere;
+}
+
+.progress{
+  height:28px;
+  overflow:hidden;
+  background:#061620;
+  border:1px solid #5a7e92;
+  border-radius:20px;
+}
+
+.progressFill{
+  width:0;
+  height:100%;
+  background:linear-gradient(90deg,#178fca,#48d8ef);
+}
+
+.sections{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  margin-top:20px;
+}
+
+.equation{
+  padding:11px;
+  margin:9px 0;
+  color:#fff;
+  background:#071924;
+  border-radius:8px;
+  font-family:Georgia,serif;
+  font-size:1.06rem;
+  line-height:1.65;
+}
+
+.notice{
+  margin:12px 0;
+  padding:12px;
+  background:#16382b;
+  border-left:5px solid var(--green);
+  border-radius:7px;
+}
+
+.warning{
+  background:#3b2c1d;
+  border-left-color:var(--orange);
+}
+
+.error{
+  color:#ffabab;
+  background:#3d2025;
+  border-left-color:var(--red);
+}
+
+.comparison{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.comparison > div{
+  padding:12px;
+  background:#071924;
+  border-radius:9px;
+}
+
+.currentChoice{
+  border:2px solid var(--yellow);
+}
+
+.energyFlow{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  text-align:center;
+}
+
+.energyBox{
+  flex:1;
+  padding:12px 6px;
+  background:#071924;
+  border-radius:10px;
+}
+
+.energyArrow{
+  color:var(--yellow);
+  font-size:1.6rem;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:8px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+}
+
+details{margin-top:20px}
+
+summary{
+  cursor:pointer;
+  font-weight:850;
+  font-size:1.08rem;
+}
+
+@media(max-width:980px){
+  .layout{grid-template-columns:1fr}
+  .sections{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:560px){
+  .stats{grid-template-columns:1fr}
+  .comparison{grid-template-columns:1fr}
+  .energyFlow{flex-direction:column}
+  .energyArrow{transform:rotate(90deg)}
+  canvas{height:420px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behaviour:auto!important;
+    transition:none!important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>☀️ Solar Stock-Water Bore Simulator</h1>
+  <p>
+    Year 9 Physics • Photovoltaic effect • Series and parallel circuits
+    • Power • Efficiency • Gravitational potential energy
+  </p>
+</header>
+
+<main>
+
+<div class="layout">
+
+<!-- ========================================================
+     CONTROLS
+========================================================= -->
+
+<section class="card" aria-labelledby="controlsHeading">
+
+<h2 id="controlsHeading">Change the system</h2>
+
+<div class="control">
+  <div class="controlTop">
+    <strong>Solar radiation</strong>
+    <span class="value"><span id="radiationValue">800</span> W/m²</span>
+  </div>
+
+  <div class="inputRow">
+    <input
+      id="radiation"
+      type="range"
+      min="0"
+      max="1200"
+      step="10"
+      value="800"
+      aria-label="Solar irradiance in watts per square metre">
+
+    <input
+      id="radiationNumber"
+      type="number"
+      min="0"
+      max="1200"
+      step="10"
+      value="800"
+      aria-label="Solar irradiance numerical input">
+  </div>
+
+  <small>Power from sunlight arriving at each square metre.</small>
+</div>
+
+
+<div class="control">
+  <div class="controlTop">
+    <strong>Total area of two panels</strong>
+    <span class="value"><span id="areaValue">2.0</span> m²</span>
+  </div>
+
+  <div class="inputRow">
+    <input
+      id="area"
+      type="range"
+      min="1"
+      max="3"
+      step="0.1"
+      value="2"
+      aria-label="Total solar panel area">
+
+    <input
+      id="areaNumber"
+      type="number"
+      min="1"
+      max="3"
+      step="0.1"
+      value="2"
+      aria-label="Total panel area numerical input">
+  </div>
+
+  <small>
+    The total area is divided equally between two identical panels.
+  </small>
+</div>
+
+
+<div class="control">
+  <div class="controlTop">
+    <strong>Depth to bore water</strong>
+    <span class="value"><span id="headValue">60</span> m</span>
+  </div>
+
+  <select id="head" aria-label="Depth to bore water">
+    <option value="100">100 m</option>
+    <option value="80">80 m</option>
+    <option value="60" selected>60 m</option>
+    <option value="30">30 m</option>
+    <option value="20">20 m</option>
+    <option value="10">10 m</option>
+  </select>
+
+  <small>
+    This simplified model treats water depth as the vertical pumping head.
+  </small>
+</div>
+
+
+<h3>Panel connection</h3>
+
+<div class="control">
+
+  <div class="connectionChoices" role="group" aria-label="Panel connection">
+
+    <button
+      id="seriesButton"
+      class="connectionButton selected"
+      type="button"
+      aria-pressed="true">
+      Two panels<br><strong>in series</strong>
+    </button>
+
+    <button
+      id="parallelButton"
+      class="connectionButton"
+      type="button"
+      aria-pressed="false">
+      Two panels<br><strong>in parallel</strong>
+    </button>
+
+  </div>
+
+  <p id="connectionExplanation" class="muted">
+    In series, panel voltages add while current remains equal to one
+    panel's current.
+  </p>
+
+</div>
+
+
+<h3>Efficiencies</h3>
+
+<div class="control">
+
+  <div class="controlTop">
+    <strong>Panel efficiency</strong>
+    <span class="value"><span id="panelEfficiencyValue">20</span>%</span>
+  </div>
+
+  <input
+    id="panelEfficiency"
+    type="range"
+    min="10"
+    max="24"
+    step="1"
+    value="20"
+    aria-label="Photovoltaic panel efficiency">
+
+</div>
+
+
+<div class="control">
+
+  <div class="controlTop">
+    <strong>Controller efficiency</strong>
+    <span class="value"><span id="controllerEfficiencyValue">95</span>%</span>
+  </div>
+
+  <input
+    id="controllerEfficiency"
+    type="range"
+    min="80"
+    max="99"
+    step="1"
+    value="95"
+    aria-label="Pump controller efficiency">
+
+</div>
+
+
+<div class="control">
+
+  <div class="controlTop">
+    <strong>Pump and motor efficiency</strong>
+    <span class="value"><span id="pumpEfficiencyValue">55</span>%</span>
+  </div>
+
+  <input
+    id="pumpEfficiency"
+    type="range"
+    min="30"
+    max="75"
+    step="1"
+    value="55"
+    aria-label="Pump and motor efficiency">
+
+</div>
+
+
+<h3>Animation</h3>
+
+<div class="status">
+  Status:
+  <span id="animationStatus" class="paused">Paused</span>
+</div>
+
+<div class="control">
+
+  <div class="controlTop">
+    <strong>Playback speed</strong>
+    <span class="value"><span id="speedValue">600</span>×</span>
+  </div>
+
+  <input
+    id="playbackSpeed"
+    type="range"
+    min="1"
+    max="3600"
+    step="1"
+    value="600"
+    aria-label="Animation playback speed">
+
+  <small>
+    Playback speed changes simulated time only. It does not change
+    voltage, current, power or flow rate.
+  </small>
+
+</div>
+
+
+<div class="buttonRow">
+
+  <button id="playButton" type="button">
+    ▶ Play
+  </button>
+
+  <button id="pauseButton" class="secondary active" type="button">
+    Ⅱ Pause
+  </button>
+
+  <button id="stepButton" class="secondary" type="button">
+    + 1 minute
+  </button>
+
+  <button id="resetButton" class="danger" type="button">
+    ↻ Empty trough
+  </button>
+
+</div>
+
+</section>
+
+
+<!-- ========================================================
+     VISUALISATION
+========================================================= -->
+
+<section>
+
+<div class="card canvasCard">
+
+  <canvas
+    id="simulationCanvas"
+    role="img"
+    aria-label="Two photovoltaic panels powering a bore pump that fills a 2000 litre cattle trough">
+  </canvas>
+
+</div>
+
+
+<div class="stats">
+
+  <article class="stat">
+    <div class="statLabel">Solar input power</div>
+    <div class="statNumber"><span id="solarPower">0</span> W</div>
+    <small>Radiation × total area</small>
+  </article>
+
+  <article class="stat">
+    <div class="statLabel">PV electrical output</div>
+    <div class="statNumber"><span id="pvPower">0</span> W</div>
+    <small>Before controller losses</small>
+  </article>
+
+  <article class="stat">
+    <div class="statLabel">Array voltage</div>
+    <div class="statNumber"><span id="arrayVoltage">0</span> V</div>
+    <small id="voltageRule">Series: voltages add</small>
+  </article>
+
+  <article class="stat">
+    <div class="statLabel">Array current</div>
+    <div class="statNumber"><span id="arrayCurrent">0</span> A</div>
+    <small id="currentRule">Series: current stays the same</small>
+  </article>
+
+  <article class="stat">
+    <div class="statLabel">Power reaching pump</div>
+    <div class="statNumber"><span id="pumpInputPower">0</span> W</div>
+    <small>After controller losses</small>
+  </article>
+
+  <article class="stat">
+    <div class="statLabel">Useful water power</div>
+    <div class="statNumber"><span id="hydraulicPower">0</span> W</div>
+    <small>Hydraulic output power</small>
+  </article>
+
+  <article class="stat">
+    <div class="statLabel">Water flow rate</div>
+    <div class="statNumber"><span id="flowRate">0</span> L/min</div>
+    <small>Calculated from pumping head</small>
+  </article>
+
+  <article class="stat">
+    <div class="statLabel">Water pumped per hour</div>
+    <div class="statNumber"><span id="waterPerHour">0</span> L/h</div>
+  </article>
+
+</div>
+
+
+<div class="card" style="margin-top:20px">
+
+  <h2>2,000 L cattle trough</h2>
+
+  <div
+    id="troughProgress"
+    class="progress"
+    role="progressbar"
+    aria-label="Trough fill level"
+    aria-valuemin="0"
+    aria-valuemax="2000"
+    aria-valuenow="0">
+
+    <div id="progressFill" class="progressFill"></div>
+
+  </div>
+
+  <p>
+    <strong><span id="troughLitres">0.0</span> L</strong>
+    of 2,000 L
+  </p>
+
+  <p id="fillMessage" aria-live="polite"></p>
+
+</div>
+
+</section>
+
+</div>
+
+
+<!-- ========================================================
+     COMPARISON AND WORKING
+========================================================= -->
+
+<div class="sections">
+
+<section class="card">
+
+<h2>Series and parallel comparison</h2>
+
+<p>
+Both arrangements contain the same two panels, receive the same
+sunlight and produce approximately the same total power.
+</p>
+
+<div class="comparison">
+
+  <div id="seriesComparison" class="currentChoice">
+    <strong>Series</strong>
+    <div class="equation">
+      V<sub>array</sub> = V₁ + V₂<br>
+      I<sub>array</sub> = I<sub>panel</sub>
+    </div>
+    <p>
+      <strong><span id="seriesVoltage">0</span> V</strong><br>
+      <strong><span id="seriesCurrent">0</span> A</strong>
+    </p>
+  </div>
+
+  <div id="parallelComparison">
+    <strong>Parallel</strong>
+    <div class="equation">
+      V<sub>array</sub> = V<sub>panel</sub><br>
+      I<sub>array</sub> = I₁ + I₂
+    </div>
+    <p>
+      <strong><span id="parallelVoltage">0</span> V</strong><br>
+      <strong><span id="parallelCurrent">0</span> A</strong>
+    </p>
+  </div>
+
+</div>
+
+<div class="notice">
+  <strong>Important:</strong> Changing between series and parallel changes
+  voltage and current, but not the ideal total power from two identical,
+  equally illuminated panels.
+</div>
+
+<div class="notice warning">
+  In a real pumping installation, the controller must accept the array's
+  voltage and current. Shading, temperature, wiring losses and controller
+  limits can make the two arrangements perform differently.
+</div>
+
+</section>
+
+
+<section class="card">
+
+<h2>Live calculation</h2>
+
+<div id="working"></div>
+
+</section>
+
+</div>
+
+
+<section class="card" style="margin-top:20px">
+
+<h2>Energy transformations</h2>
+
+<div class="energyFlow">
+
+  <div class="energyBox">
+    ☀️<br>
+    <strong>Sunlight</strong><br>
+    <span id="chainSolar">0</span> W
+  </div>
+
+  <div class="energyArrow">→</div>
+
+  <div class="energyBox">
+    ⚡<br>
+    <strong>PV electricity</strong><br>
+    <span id="chainPV">0</span> W
+  </div>
+
+  <div class="energyArrow">→</div>
+
+  <div class="energyBox">
+    🎛️<br>
+    <strong>Controller output</strong><br>
+    <span id="chainController">0</span> W
+  </div>
+
+  <div class="energyArrow">→</div>
+
+  <div class="energyBox">
+    💧<br>
+    <strong>Lifted water</strong><br>
+    <span id="chainWater">0</span> W
+  </div>
+
+</div>
+
+<p>
+Overall sunlight-to-water efficiency:
+<strong><span id="overallEfficiency">0</span>%</strong>
+</p>
+
+</section>
+
+
+<details class="card" open>
+
+<summary>Theory, equations and model assumptions</summary>
+
+<h3>Solar input power</h3>
+
+<div class="equation">
+P<sub>solar</sub> = solar irradiance × total panel area
+</div>
+
+
+<h3>Photovoltaic efficiency</h3>
+
+<div class="equation">
+η<sub>PV</sub> =
+P<sub>electrical</sub> / P<sub>solar</sub>
+</div>
+
+<div class="equation">
+P<sub>electrical</sub> =
+η<sub>PV</sub>P<sub>solar</sub>
+</div>
+
+
+<h3>Electrical power</h3>
+
+<div class="equation">
+P = VI
+</div>
+
+<p>
+Each representative panel operates at approximately
+<strong>36.4 V at its maximum-power point</strong> when sufficient
+sunlight is available.
+</p>
+
+<div class="equation">
+I<sub>panel</sub> =
+P<sub>panel</sub> / V<sub>panel</sub>
+</div>
+
+
+<h3>Identical panels in series</h3>
+
+<div class="equation">
+V<sub>series</sub> = V₁ + V₂
+</div>
+
+<div class="equation">
+I<sub>series</sub> = I<sub>panel</sub>
+</div>
+
+<p>
+Series connection gives a higher voltage without adding the panel currents.
+</p>
+
+
+<h3>Identical panels in parallel</h3>
+
+<div class="equation">
+V<sub>parallel</sub> = V<sub>panel</sub>
+</div>
+
+<div class="equation">
+I<sub>parallel</sub> = I₁ + I₂
+</div>
+
+<p>
+Parallel connection gives a higher current without adding the panel voltages.
+</p>
+
+
+<h3>Checking electrical power</h3>
+
+<div class="equation">
+P<sub>array</sub> =
+V<sub>array</sub>I<sub>array</sub>
+</div>
+
+<p>
+For two identical panels under equal illumination, this gives approximately
+the same total power for series and parallel connections.
+</p>
+
+
+<h3>Controller and pump efficiencies</h3>
+
+<div class="equation">
+P<sub>pump input</sub> =
+η<sub>controller</sub>P<sub>PV</sub>
+</div>
+
+<div class="equation">
+P<sub>water</sub> =
+η<sub>pump</sub>P<sub>pump input</sub>
+</div>
+
+
+<h3>Water lifting</h3>
+
+<div class="equation">
+E<sub>p</sub> = mgh
+</div>
+
+<div class="equation">
+P<sub>water</sub> = ρgQh
+</div>
+
+<div class="equation">
+Q =
+P<sub>water</sub> / (ρgh)
+</div>
+
+
+<h3>Values assumed by this model</h3>
+
+<table>
+  <tr>
+    <th>Quantity</th>
+    <th>Value or treatment</th>
+  </tr>
+  <tr>
+    <td>Number of panels</td>
+    <td>2 identical panels</td>
+  </tr>
+  <tr>
+    <td>Representative panel operating voltage</td>
+    <td>36.4 V per panel</td>
+  </tr>
+  <tr>
+    <td>Total panel area</td>
+    <td>1.0–3.0 m², divided equally</td>
+  </tr>
+  <tr>
+    <td>Water density</td>
+    <td>1,000 kg/m³</td>
+  </tr>
+  <tr>
+    <td>Gravitational field strength</td>
+    <td>9.81 N/kg</td>
+  </tr>
+  <tr>
+    <td>Minimum controller/pump start power</td>
+    <td>60 W after controller losses</td>
+  </tr>
+</table>
+
+<div class="notice warning">
+  This remains an educational model. A real design requires the selected
+  panel's I–V curve, temperature coefficients, pump controller voltage
+  range, maximum input current, pipe-friction losses, bore drawdown and
+  the manufacturer's pump curve.
+</div>
+
+</details>
+
+
+<section class="card" style="margin-top:20px">
+
+<h2>Student investigation</h2>
+
+<ol>
+  <li>Set solar radiation to 800 W/m² and total panel area to 2.0 m².</li>
+  <li>Select series and record voltage, current and power.</li>
+  <li>Select parallel and record voltage, current and power.</li>
+  <li>Explain why the voltage and current change but total power does not.</li>
+  <li>Compare flow rate at pumping heads of 10 m, 60 m and 100 m.</li>
+  <li>Reduce solar radiation until the pump stops. Record the start threshold.</li>
+</ol>
+
+</section>
+
+</main>
+
+
+<script>
+"use strict";
+
+/* ==========================================================
+   CONSTANTS
+========================================================== */
+
+const WATER_DENSITY = 1000;       // kg/m³
+const GRAVITY = 9.81;             // N/kg
+const TROUGH_CAPACITY = 2000;     // L
+const PANEL_MPP_VOLTAGE = 36.4;   // V per representative panel
+const NUMBER_OF_PANELS = 2;
+const MINIMUM_PUMP_INPUT = 60;    // W after controller losses
+
+
+/* ==========================================================
+   APPLICATION STATE
+========================================================== */
+
+const state = {
+  radiation:800,
+  totalArea:2.0,
+  head:60,
+  panelEfficiency:0.20,
+  controllerEfficiency:0.95,
+  pumpEfficiency:0.55,
+  connection:"series",
+  troughLitres:0,
+  playing:false,
+  playbackSpeed:600,
+  lastTimestamp:null,
+  waterPhase:0
+};
+
+const $ = id => document.getElementById(id);
+
+
+/* ==========================================================
+   PHYSICS ENGINE
+========================================================== */
+
+function calculatePhysics(){
+
+  /*
+    Incoming radiant power:
+    W/m² × m² = W
+  */
+  const solarPower =
+    state.radiation *
+    state.totalArea;
+
+
+  /*
+    PV electrical output:
+    efficiency = output/input
+  */
+  const pvPower =
+    solarPower *
+    state.panelEfficiency;
+
+
+  /*
+    The total area and total PV power are shared equally
+    by the two identical panels.
+  */
+  const areaPerPanel =
+    state.totalArea /
+    NUMBER_OF_PANELS;
+
+  const powerPerPanel =
+    pvPower /
+    NUMBER_OF_PANELS;
+
+
+  /*
+    At zero sunlight, voltage and current are shown as zero.
+
+    Otherwise the educational model approximates each panel as
+    operating at its representative maximum-power voltage.
+  */
+  const panelVoltage =
+    pvPower > 0
+      ? PANEL_MPP_VOLTAGE
+      : 0;
+
+
+  /*
+    P = VI
+    I = P/V
+  */
+  const panelCurrent =
+    panelVoltage > 0
+      ? powerPerPanel / panelVoltage
+      : 0;
+
+
+  /*
+    SERIES:
+      voltages add
+      current stays equal to one panel current
+
+    PARALLEL:
+      voltage remains equal to one panel voltage
+      panel currents add
+  */
+  const seriesVoltage =
+    panelVoltage * NUMBER_OF_PANELS;
+
+  const seriesCurrent =
+    panelCurrent;
+
+  const parallelVoltage =
+    panelVoltage;
+
+  const parallelCurrent =
+    panelCurrent * NUMBER_OF_PANELS;
+
+
+  const arrayVoltage =
+    state.connection === "series"
+      ? seriesVoltage
+      : parallelVoltage;
+
+  const arrayCurrent =
+    state.connection === "series"
+      ? seriesCurrent
+      : parallelCurrent;
+
+
+  /*
+    Independent check:
+    P = VI
+  */
+  const checkedArrayPower =
+    arrayVoltage *
+    arrayCurrent;
+
+
+  /*
+    Controller output.
+  */
+  const controllerOutput =
+    pvPower *
+    state.controllerEfficiency;
+
+
+  /*
+    A real pump/controller requires sufficient power to start.
+
+    If the available controller output is below the educational
+    threshold, the pump does not operate.
+  */
+  const pumpRunning =
+    controllerOutput >= MINIMUM_PUMP_INPUT;
+
+
+  /*
+    Useful hydraulic power.
+  */
+  const hydraulicPower =
+    pumpRunning
+      ? controllerOutput *
+        state.pumpEfficiency
+      : 0;
+
+
+  /*
+    Hydraulic power:
+      P = rho × g × Q × h
+
+    Rearranged:
+      Q = P / (rho × g × h)
+
+    Q is initially calculated in m³/s.
+  */
+  const flowM3Second =
+    state.head > 0
+      ? hydraulicPower /
+        (
+          WATER_DENSITY *
+          GRAVITY *
+          state.head
+        )
+      : 0;
+
+
+  const flowLSecond =
+    flowM3Second * 1000;
+
+  const flowLMinute =
+    flowLSecond * 60;
+
+  const waterPerHour =
+    flowLMinute * 60;
+
+
+  /*
+    Overall system efficiency:
+    useful hydraulic output / solar input
+  */
+  const overallEfficiency =
+    solarPower > 0
+      ? hydraulicPower / solarPower
+      : 0;
+
+
+  return {
+    solarPower,
+    pvPower,
+    areaPerPanel,
+    powerPerPanel,
+    panelVoltage,
+    panelCurrent,
+    seriesVoltage,
+    seriesCurrent,
+    parallelVoltage,
+    parallelCurrent,
+    arrayVoltage,
+    arrayCurrent,
+    checkedArrayPower,
+    controllerOutput,
+    pumpRunning,
+    hydraulicPower,
+    flowM3Second,
+    flowLSecond,
+    flowLMinute,
+    waterPerHour,
+    overallEfficiency
+  };
+}
+
+
+/* ==========================================================
+   FORMATTING
+========================================================== */
+
+function format(value,decimals=1){
+
+  if(!Number.isFinite(value)){
+    return "—";
+  }
+
+  return value.toLocaleString("en-AU",{
+    minimumFractionDigits:decimals,
+    maximumFractionDigits:decimals
+  });
+
+}
+
+
+/* ==========================================================
+   CONNECT SLIDER AND NUMBER FIELD
+========================================================== */
+
+function connectPair(sliderID,numberID,stateKey){
+
+  const slider = $(sliderID);
+  const numberInput = $(numberID);
+
+  function apply(rawValue){
+
+    let value = Number(rawValue);
+
+    if(!Number.isFinite(value)){
+      return;
+    }
+
+    value = Math.max(
+      Number(slider.min),
+      Math.min(Number(slider.max),value)
+    );
+
+    state[stateKey] = value;
+
+    slider.value = value;
+    numberInput.value = value;
+
+    refresh();
+  }
+
+  slider.addEventListener("input",()=>{
+    apply(slider.value);
+  });
+
+  numberInput.addEventListener("change",()=>{
+    apply(numberInput.value);
+  });
+}
+
+connectPair(
+  "radiation",
+  "radiationNumber",
+  "radiation"
+);
+
+connectPair(
+  "area",
+  "areaNumber",
+  "totalArea"
+);
+
+
+/* ==========================================================
+   CONTROL EVENTS
+========================================================== */
+
+$("head").addEventListener("change",function(){
+  state.head = Number(this.value);
+  refresh();
+});
+
+$("panelEfficiency").addEventListener("input",function(){
+  state.panelEfficiency = Number(this.value)/100;
+  refresh();
+});
+
+$("controllerEfficiency").addEventListener("input",function(){
+  state.controllerEfficiency = Number(this.value)/100;
+  refresh();
+});
+
+$("pumpEfficiency").addEventListener("input",function(){
+  state.pumpEfficiency = Number(this.value)/100;
+  refresh();
+});
+
+$("playbackSpeed").addEventListener("input",function(){
+  state.playbackSpeed = Number(this.value);
+  $("speedValue").textContent = state.playbackSpeed;
+});
+
+
+function setConnection(connection){
+
+  state.connection = connection;
+
+  const seriesSelected =
+    connection === "series";
+
+  $("seriesButton").classList.toggle(
+    "selected",
+    seriesSelected
+  );
+
+  $("parallelButton").classList.toggle(
+    "selected",
+    !seriesSelected
+  );
+
+  $("seriesButton").setAttribute(
+    "aria-pressed",
+    String(seriesSelected)
+  );
+
+  $("parallelButton").setAttribute(
+    "aria-pressed",
+    String(!seriesSelected)
+  );
+
+  $("seriesComparison").classList.toggle(
+    "currentChoice",
+    seriesSelected
+  );
+
+  $("parallelComparison").classList.toggle(
+    "currentChoice",
+    !seriesSelected
+  );
+
+  refresh();
+}
+
+$("seriesButton").addEventListener("click",()=>{
+  setConnection("series");
+});
+
+$("parallelButton").addEventListener("click",()=>{
+  setConnection("parallel");
+});
+
+
+/* ==========================================================
+   ANIMATION CONTROLS
+========================================================== */
+
+$("playButton").addEventListener("click",()=>{
+
+  /*
+    Reset the timestamp so restarting cannot cause a large jump.
+  */
+  state.lastTimestamp = null;
+  state.playing = true;
+
+  updateAnimationStatus();
+  drawSimulation();
+});
+
+$("pauseButton").addEventListener("click",()=>{
+  state.playing = false;
+  updateAnimationStatus();
+  drawSimulation();
+});
+
+$("stepButton").addEventListener("click",()=>{
+
+  state.playing = false;
+
+  const physics = calculatePhysics();
+
+  /*
+    Advance exactly one simulated minute.
+  */
+  state.troughLitres += physics.flowLMinute;
+
+  state.troughLitres = Math.min(
+    TROUGH_CAPACITY,
+    state.troughLitres
+  );
+
+  updateAnimationStatus();
+  refresh();
+});
+
+$("resetButton").addEventListener("click",()=>{
+
+  state.playing = false;
+  state.troughLitres = 0;
+  state.waterPhase = 0;
+  state.lastTimestamp = null;
+
+  updateAnimationStatus();
+  refresh();
+});
+
+
+function updateAnimationStatus(){
+
+  const status = $("animationStatus");
+
+  if(state.playing){
+
+    status.textContent = "Running";
+    status.className = "running";
+
+    $("playButton").classList.add("active");
+    $("pauseButton").classList.remove("active");
+
+  }else{
+
+    status.textContent = "Paused";
+    status.className = "paused";
+
+    $("playButton").classList.remove("active");
+    $("pauseButton").classList.add("active");
+
+  }
+}
+
+
+/* ==========================================================
+   DISPLAY UPDATE
+========================================================== */
+
+function refresh(){
+
+  const p = calculatePhysics();
+
+
+  /* Input labels */
+
+  $("radiationValue").textContent =
+    format(state.radiation,0);
+
+  $("areaValue").textContent =
+    format(state.totalArea,1);
+
+  $("headValue").textContent =
+    format(state.head,0);
+
+  $("panelEfficiencyValue").textContent =
+    format(state.panelEfficiency*100,0);
+
+  $("controllerEfficiencyValue").textContent =
+    format(state.controllerEfficiency*100,0);
+
+  $("pumpEfficiencyValue").textContent =
+    format(state.pumpEfficiency*100,0);
+
+
+  /* Main output values */
+
+  $("solarPower").textContent =
+    format(p.solarPower,0);
+
+  $("pvPower").textContent =
+    format(p.pvPower,0);
+
+  $("arrayVoltage").textContent =
+    format(p.arrayVoltage,1);
+
+  $("arrayCurrent").textContent =
+    format(p.arrayCurrent,2);
+
+  $("pumpInputPower").textContent =
+    format(p.controllerOutput,0);
+
+  $("hydraulicPower").textContent =
+    format(p.hydraulicPower,0);
+
+  $("flowRate").textContent =
+    format(p.flowLMinute,2);
+
+  $("waterPerHour").textContent =
+    format(p.waterPerHour,1);
+
+  $("overallEfficiency").textContent =
+    format(p.overallEfficiency*100,1);
+
+
+  /* Series/parallel comparison */
+
+  $("seriesVoltage").textContent =
+    format(p.seriesVoltage,1);
+
+  $("seriesCurrent").textContent =
+    format(p.seriesCurrent,2);
+
+  $("parallelVoltage").textContent =
+    format(p.parallelVoltage,1);
+
+  $("parallelCurrent").textContent =
+    format(p.parallelCurrent,2);
+
+
+  if(state.connection === "series"){
+
+    $("connectionExplanation").textContent =
+      "In series, panel voltages add while current remains equal to one panel's current.";
+
+    $("voltageRule").textContent =
+      "Series: panel voltages add";
+
+    $("currentRule").textContent =
+      "Series: current stays the same";
+
+  }else{
+
+    $("connectionExplanation").textContent =
+      "In parallel, panel currents add while voltage remains equal to one panel's voltage.";
+
+    $("voltageRule").textContent =
+      "Parallel: voltage stays the same";
+
+    $("currentRule").textContent =
+      "Parallel: panel currents add";
+  }
+
+
+  /* Energy chain */
+
+  $("chainSolar").textContent =
+    format(p.solarPower,0);
+
+  $("chainPV").textContent =
+    format(p.pvPower,0);
+
+  $("chainController").textContent =
+    format(p.controllerOutput,0);
+
+  $("chainWater").textContent =
+    format(p.hydraulicPower,0);
+
+
+  /* Trough display */
+
+  $("troughLitres").textContent =
+    format(state.troughLitres,1);
+
+  const fillPercentage =
+    Math.min(
+      100,
+      state.troughLitres /
+      TROUGH_CAPACITY *
+      100
+    );
+
+  $("progressFill").style.width =
+    fillPercentage + "%";
+
+  $("troughProgress").setAttribute(
+    "aria-valuenow",
+    String(Math.round(state.troughLitres))
+  );
+
+
+  if(!p.pumpRunning){
+
+    $("fillMessage").innerHTML =
+      '<span class="paused">' +
+      'The available controller output is below the 60 W pump-start threshold. ' +
+      'Increase sunlight, panel area or panel efficiency.' +
+      '</span>';
+
+  }else if(state.troughLitres >= TROUGH_CAPACITY){
+
+    $("fillMessage").innerHTML =
+      '<span class="running">✓ The cattle trough is full.</span>';
+
+  }else{
+
+    const hoursToFill =
+      TROUGH_CAPACITY /
+      p.waterPerHour;
+
+    $("fillMessage").innerHTML =
+      "At these settings, an empty trough would take approximately " +
+      "<strong>" +
+      format(hoursToFill,1) +
+      " hours</strong> to fill.";
+  }
+
+
+  /* Live working */
+
+  const connectionWorking =
+    state.connection === "series"
+      ? `
+        V<sub>array</sub> =
+        ${format(p.panelVoltage,1)} V +
+        ${format(p.panelVoltage,1)} V =
+        <strong>${format(p.arrayVoltage,1)} V</strong><br>
+
+        I<sub>array</sub> =
+        I<sub>panel</sub> =
+        <strong>${format(p.arrayCurrent,2)} A</strong>
+      `
+      : `
+        V<sub>array</sub> =
+        V<sub>panel</sub> =
+        <strong>${format(p.arrayVoltage,1)} V</strong><br>
+
+        I<sub>array</sub> =
+        ${format(p.panelCurrent,2)} A +
+        ${format(p.panelCurrent,2)} A =
+        <strong>${format(p.arrayCurrent,2)} A</strong>
+      `;
+
+
+  $("working").innerHTML = `
+
+    <strong>1. Solar input</strong>
+
+    <div class="equation">
+      P<sub>solar</sub> =
+      irradiance × total area
+      <br>
+
+      =
+      ${format(state.radiation,0)} W/m²
+      ×
+      ${format(state.totalArea,1)} m²
+      <br>
+
+      =
+      <strong>${format(p.solarPower,1)} W</strong>
+    </div>
+
+
+    <strong>2. Electrical output</strong>
+
+    <div class="equation">
+      P<sub>PV</sub> =
+      η<sub>PV</sub>P<sub>solar</sub>
+      <br>
+
+      =
+      ${format(state.panelEfficiency,2)}
+      ×
+      ${format(p.solarPower,1)} W
+      <br>
+
+      =
+      <strong>${format(p.pvPower,1)} W</strong>
+    </div>
+
+
+    <strong>3. Power and current from each panel</strong>
+
+    <div class="equation">
+      P<sub>panel</sub> =
+      ${format(p.pvPower,1)} W ÷ 2
+      =
+      ${format(p.powerPerPanel,1)} W
+      <br>
+
+      I<sub>panel</sub> =
+      P<sub>panel</sub> /
+      V<sub>panel</sub>
+      <br>
+
+      =
+      ${format(p.powerPerPanel,1)} W
+      ÷
+      ${format(p.panelVoltage,1)} V
+      <br>
+
+      =
+      <strong>${format(p.panelCurrent,2)} A</strong>
+    </div>
+
+
+    <strong>4. Selected ${state.connection} connection</strong>
+
+    <div class="equation">
+      ${connectionWorking}
+    </div>
+
+
+    <strong>5. Check using P = VI</strong>
+
+    <div class="equation">
+      P =
+      ${format(p.arrayVoltage,1)} V
+      ×
+      ${format(p.arrayCurrent,2)} A
+      <br>
+
+      =
+      <strong>${format(p.checkedArrayPower,1)} W</strong>
+    </div>
+
+
+    <strong>6. Controller output</strong>
+
+    <div class="equation">
+      P<sub>controller</sub> =
+      η<sub>controller</sub>P<sub>PV</sub>
+      <br>
+
+      =
+      ${format(state.controllerEfficiency,2)}
+      ×
+      ${format(p.pvPower,1)} W
+      <br>
+
+      =
+      <strong>${format(p.controllerOutput,1)} W</strong>
+    </div>
+
+
+    <strong>7. Useful water power</strong>
+
+    <div class="equation">
+      P<sub>water</sub> =
+      η<sub>pump</sub>P<sub>controller</sub>
+      <br>
+
+      =
+      ${p.pumpRunning
+        ? `${format(state.pumpEfficiency,2)}
+           ×
+           ${format(p.controllerOutput,1)} W`
+        : `0 W because the start threshold has not been reached`
+      }
+      <br>
+
+      =
+      <strong>${format(p.hydraulicPower,1)} W</strong>
+    </div>
+
+
+    <strong>8. Water flow</strong>
+
+    <div class="equation">
+      Q =
+      P<sub>water</sub> / (ρgh)
+      <br>
+
+      =
+      ${format(p.hydraulicPower,1)}
+      ÷
+      (
+      ${WATER_DENSITY}
+      ×
+      ${GRAVITY}
+      ×
+      ${format(state.head,0)}
+      )
+      <br>
+
+      =
+      ${p.flowM3Second.toExponential(3)} m³/s
+      <br>
+
+      =
+      <strong>${format(p.flowLMinute,2)} L/min</strong>
+    </div>
+  `;
+
+  drawSimulation();
+}
+
+
+/* ==========================================================
+   CANVAS SETUP
+========================================================== */
+
+const canvas = $("simulationCanvas");
+const ctx = canvas.getContext("2d");
+
+function resizeCanvas(){
+
+  const rectangle =
+    canvas.getBoundingClientRect();
+
+  const deviceScale =
+    Math.min(window.devicePixelRatio || 1,2);
+
+  canvas.width =
+    Math.round(rectangle.width * deviceScale);
+
+  canvas.height =
+    Math.round(rectangle.height * deviceScale);
+
+  ctx.setTransform(
+    deviceScale,0,0,deviceScale,0,0
+  );
+
+  drawSimulation();
+}
+
+window.addEventListener("resize",resizeCanvas);
+
+
+/* ==========================================================
+   CANVAS HELPERS
+========================================================== */
+
+function drawPanel(x,y,label){
+
+  ctx.save();
+
+  ctx.translate(x,y);
+  ctx.rotate(-0.16);
+
+  ctx.fillStyle = "#154471";
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 3;
+
+  ctx.fillRect(-54,-32,108,64);
+  ctx.strokeRect(-54,-32,108,64);
+
+  ctx.strokeStyle = "#78add0";
+  ctx.lineWidth = 1;
+
+  for(let gridX=-30;gridX<=30;gridX+=20){
+    ctx.beginPath();
+    ctx.moveTo(gridX,-32);
+    ctx.lineTo(gridX,32);
+    ctx.stroke();
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(-54,0);
+  ctx.lineTo(54,0);
+  ctx.stroke();
+
+  ctx.restore();
+
+  ctx.fillStyle = "#10252e";
+  ctx.font = "bold 12px system-ui";
+  ctx.fillText(label,x-23,y+51);
+}
+
+
+function drawArrow(x1,y1,x2,y2,colour,label){
+
+  ctx.strokeStyle = colour;
+  ctx.fillStyle = colour;
+  ctx.lineWidth = 4;
+
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+
+  const angle =
+    Math.atan2(y2-y1,x2-x1);
+
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(
+    x2-12*Math.cos(angle-.45),
+    y2-12*Math.sin(angle-.45)
+  );
+  ctx.lineTo(
+    x2-12*Math.cos(angle+.45),
+    y2-12*Math.sin(angle+.45)
+  );
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.font = "bold 12px system-ui";
+  ctx.fillText(
+    label,
+    (x1+x2)/2+5,
+    (y1+y2)/2-7
+  );
+}
+
+
+/* ==========================================================
+   DRAW SIMULATION
+========================================================== */
+
+function drawSimulation(){
+
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  if(width <= 0 || height <= 0){
+    return;
+  }
+
+  const physics = calculatePhysics();
+
+  ctx.clearRect(0,0,width,height);
+
+
+  /* Sky */
+
+  const sky =
+    ctx.createLinearGradient(0,0,0,height*.53);
+
+  sky.addColorStop(0,"#78c9ef");
+  sky.addColorStop(1,"#e3f7ff");
+
+  ctx.fillStyle = sky;
+  ctx.fillRect(0,0,width,height*.53);
+
+
+  /* Ground */
+
+  ctx.fillStyle = "#a37f4f";
+  ctx.fillRect(0,height*.53,width,height*.47);
+
+
+  /* Sun */
+
+  ctx.fillStyle = "#ffd43b";
+  ctx.beginPath();
+  ctx.arc(52,52,26,0,Math.PI*2);
+  ctx.fill();
+
+
+  /* Two panels */
+
+  const panel1X = width*.14;
+  const panel2X = width*.29;
+  const panelY = height*.32;
+
+  drawPanel(panel1X,panelY,"Panel 1");
+  drawPanel(panel2X,panelY,"Panel 2");
+
+
+  /* Panel supports */
+
+  ctx.strokeStyle = "#4b5b62";
+  ctx.lineWidth = 6;
+
+  for(const x of [panel1X,panel2X]){
+    ctx.beginPath();
+    ctx.moveTo(x,panelY+30);
+    ctx.lineTo(x,height*.53);
+    ctx.stroke();
+  }
+
+
+  /* Connection diagram */
+
+  ctx.strokeStyle = "#795fe8";
+  ctx.lineWidth = 4;
+
+  if(state.connection === "series"){
+
+    ctx.beginPath();
+    ctx.moveTo(panel1X+54,panelY);
+    ctx.lineTo(panel2X-54,panelY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(panel2X+54,panelY);
+    ctx.lineTo(width*.50,height*.47);
+    ctx.stroke();
+
+  }else{
+
+    const joinTop = panelY-54;
+    const joinBottom = panelY+54;
+
+    ctx.beginPath();
+    ctx.moveTo(panel1X,panelY-32);
+    ctx.lineTo(panel1X,joinTop);
+    ctx.lineTo(panel2X,joinTop);
+    ctx.lineTo(panel2X,panelY-32);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(panel1X,panelY+32);
+    ctx.lineTo(panel1X,joinBottom);
+    ctx.lineTo(panel2X,joinBottom);
+    ctx.lineTo(panel2X,panelY+32);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(panel2X,joinBottom);
+    ctx.lineTo(width*.50,height*.47);
+    ctx.stroke();
+  }
+
+
+  /* Controller */
+
+  const controllerX = width*.46;
+  const controllerY = height*.41;
+
+  ctx.fillStyle = "#6653cc";
+  ctx.fillRect(
+    controllerX-40,
+    controllerY-22,
+    80,
+    44
+  );
+
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 11px system-ui";
+  ctx.fillText(
+    "CONTROLLER",
+    controllerX-35,
+    controllerY+4
+  );
+
+
+  /* Bore */
+
+  const boreX = width*.58;
+
+  ctx.fillStyle = "#465a64";
+  ctx.fillRect(
+    boreX-14,
+    height*.48,
+    28,
+    height*.47
+  );
+
+
+  const depthFraction =
+    (state.head-10)/90;
+
+  const boreWaterY =
+    height*.67 +
+    depthFraction*height*.20;
+
+
+  ctx.strokeStyle = "#29b9e4";
+  ctx.lineWidth = 5;
+
+  ctx.beginPath();
+  ctx.moveTo(boreX-53,boreWaterY);
+  ctx.lineTo(boreX+53,boreWaterY);
+  ctx.stroke();
+
+
+  /* Pump */
+
+  ctx.fillStyle = "#f39a45";
+  ctx.fillRect(
+    boreX-25,
+    boreWaterY-9,
+    50,
+    29
+  );
+
+  ctx.fillStyle = "#12252d";
+  ctx.font = "bold 12px system-ui";
+  ctx.fillText(
+    "PUMP",
+    boreX-20,
+    boreWaterY+10
+  );
+
+
+  /* Controller to pump cable */
+
+  ctx.strokeStyle = "#795fe8";
+  ctx.lineWidth = 4;
+  ctx.setLineDash([7,5]);
+
+  ctx.beginPath();
+  ctx.moveTo(controllerX+40,controllerY);
+  ctx.lineTo(boreX-25,height*.48);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+
+
+  /* Pipe */
+
+  const troughX = width*.83;
+  const pipeTop = height*.39;
+
+  ctx.strokeStyle = "#eef4f5";
+  ctx.lineWidth = 10;
+
+  ctx.beginPath();
+  ctx.moveTo(boreX,boreWaterY);
+  ctx.lineTo(boreX,pipeTop);
+  ctx.lineTo(troughX,pipeTop);
+  ctx.lineTo(troughX,height*.56);
+  ctx.stroke();
+
+
+  /* Trough */
+
+  const troughWidth =
+    Math.min(180,width*.22);
+
+  const troughHeight =
+    height*.18;
+
+  const troughLeft =
+    troughX-troughWidth/2;
+
+  const troughTop =
+    height*.61;
+
+  ctx.fillStyle = "#5f737c";
+  ctx.fillRect(
+    troughLeft,
+    troughTop,
+    troughWidth,
+    troughHeight
+  );
+
+  ctx.fillStyle = "#203641";
+  ctx.fillRect(
+    troughLeft+8,
+    troughTop+8,
+    troughWidth-16,
+    troughHeight-18
+  );
+
+
+  /* Trough water */
+
+  const fillFraction =
+    Math.min(
+      1,
+      state.troughLitres/TROUGH_CAPACITY
+    );
+
+  const innerHeight =
+    troughHeight-18;
+
+  const waterHeight =
+    innerHeight*fillFraction;
+
+  ctx.fillStyle = "#2fb9e5";
+
+  ctx.fillRect(
+    troughLeft+8,
+    troughTop+8+innerHeight-waterHeight,
+    troughWidth-16,
+    waterHeight
+  );
+
+
+  /* Sunlight arrows */
+
+  drawArrow(
+    79,70,
+    panel1X-25,panelY-40,
+    "#e7a900",
+    "sunlight"
+  );
+
+  drawArrow(
+    82,82,
+    panel2X-25,panelY-42,
+    "#e7a900",
+    ""
+  );
+
+
+  /* Animated water */
+
+  if(
+    state.playing &&
+    physics.pumpRunning &&
+    physics.flowLMinute > 0 &&
+    state.troughLitres < TROUGH_CAPACITY
+  ){
+
+    ctx.fillStyle = "#13aee1";
+
+    for(let i=0;i<5;i++){
+
+      const phase =
+        (state.waterPhase+i/5)%1;
+
+      const dropY =
+        height*.49 +
+        phase*(troughTop-height*.49);
+
+      ctx.beginPath();
+      ctx.arc(troughX,dropY,5,0,Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+
+  /* Labels */
+
+  ctx.fillStyle = "#10242d";
+  ctx.font = "bold 14px system-ui";
+
+  ctx.fillText(
+    state.connection === "series"
+      ? "SERIES CONNECTION"
+      : "PARALLEL CONNECTION",
+    Math.max(12,width*.15),
+    height*.17
+  );
+
+  ctx.fillText(
+    format(physics.arrayVoltage,1) +
+    " V, " +
+    format(physics.arrayCurrent,2) +
+    " A",
+    Math.max(12,width*.17),
+    height*.21
+  );
+
+  ctx.fillText(
+    state.head+" m pumping head",
+    boreX+24,
+    (height*.52+boreWaterY)/2
+  );
+
+  ctx.fillText(
+    "Bore water",
+    boreX+59,
+    boreWaterY+4
+  );
+
+  ctx.fillText(
+    "2,000 L trough",
+    Math.max(10,troughX-58),
+    troughTop+troughHeight+22
+  );
+
+
+  /* Running indicator */
+
+  ctx.font = "bold 16px system-ui";
+
+  if(state.playing){
+
+    ctx.fillStyle = "#176c3a";
+    ctx.fillText(
+      "▶ SIMULATION RUNNING",
+      17,
+      height-20
+    );
+
+  }else{
+
+    ctx.fillStyle = "#714b10";
+    ctx.fillText(
+      "Ⅱ PAUSED",
+      17,
+      height-20
+    );
+  }
+}
+
+
+/* ==========================================================
+   ANIMATION ENGINE
+========================================================== */
+
+function animationLoop(timestamp){
+
+  /*
+    The requestAnimationFrame loop always remains active.
+    Play and Pause only control advancement of simulated time.
+  */
+
+  if(state.lastTimestamp === null){
+    state.lastTimestamp = timestamp;
+  }
+
+  let realElapsedSeconds =
+    (timestamp-state.lastTimestamp)/1000;
+
+  /*
+    Prevent large jumps after the browser tab has been inactive.
+  */
+  realElapsedSeconds =
+    Math.min(realElapsedSeconds,0.1);
+
+  state.lastTimestamp = timestamp;
+
+
+  if(state.playing){
+
+    const physics = calculatePhysics();
+
+    const simulatedElapsedSeconds =
+      realElapsedSeconds *
+      state.playbackSpeed;
+
+    /*
+      Water added:
+      L/s × simulated seconds = L
+    */
+    state.troughLitres +=
+      physics.flowLSecond *
+      simulatedElapsedSeconds;
+
+    state.waterPhase =
+      (
+        state.waterPhase +
+        realElapsedSeconds*1.6
+      ) % 1;
+
+
+    if(state.troughLitres >= TROUGH_CAPACITY){
+
+      state.troughLitres =
+        TROUGH_CAPACITY;
+
+      state.playing = false;
+
+      updateAnimationStatus();
+    }
+
+    refresh();
+
+  }else{
+
+    drawSimulation();
+  }
+
+  requestAnimationFrame(animationLoop);
+}
+
+
+/* ==========================================================
+   INITIALISE
+========================================================== */
+
+resizeCanvas();
+updateAnimationStatus();
+refresh();
+requestAnimationFrame(animationLoop);
+
+
+/*
+================================================================
+TEACHER NOTES
+================================================================
+
+1. MODEL ASSUMPTIONS
+--------------------
+
+• Two identical photovoltaic panels are used.
+• The total selected panel area is divided equally between them.
+• Each panel is represented by a maximum-power voltage of 36.4 V.
+• Panel output power is calculated using irradiance, area and
+  selected panel efficiency.
+• Current is calculated using I = P/V.
+• Series connection adds voltage while retaining one panel current.
+• Parallel connection adds current while retaining one panel voltage.
+• Both configurations produce the same ideal total power when the
+  panels are identical and equally illuminated.
+• Controller and pump efficiencies are treated as constant.
+• The pump starts only when controller output reaches 60 W.
+• Bore-water depth is treated as pumping head.
+• Pipe friction, pressure losses and bore drawdown are omitted.
+• Water density is 1000 kg/m³.
+• Gravitational field strength is 9.81 N/kg.
+• The trough capacity is 2000 L.
+
+2. EQUATIONS
+------------
+
+Solar input:
+Psolar = irradiance × total area
+
+Panel electrical output:
+PPV = panel efficiency × Psolar
+
+Electrical power:
+P = VI
+
+Current:
+I = P/V
+
+Series:
+Varray = V1 + V2
+Iarray = Ipanel
+
+Parallel:
+Varray = Vpanel
+Iarray = I1 + I2
+
+Controller output:
+Pcontroller = controller efficiency × PPV
+
+Hydraulic output:
+Pwater = pump efficiency × Pcontroller
+
+Hydraulic power:
+Pwater = rho × g × Q × h
+
+Flow:
+Q = Pwater / (rho × g × h)
+
+Overall efficiency:
+efficiency = useful hydraulic output / solar input
+
+3. VISUAL SCALE
+---------------
+
+The diagram is schematic. Bore depth, panel dimensions, pipe length
+and trough dimensions are not drawn to one common scale. Browser
+resizing changes only the drawing, never the physical calculations.
+
+4. TEACHER CUSTOMISATION
+------------------------
+
+Change PANEL_MPP_VOLTAGE to use a different representative panel.
+
+Change MINIMUM_PUMP_INPUT to alter the controller/pump start threshold.
+
+Change TROUGH_CAPACITY to model another trough.
+
+Initial settings are stored in the state object.
+
+Slider ranges are defined in the HTML controls.
+
+Colours are stored as CSS custom properties near the top.
+
+The physics is contained in calculatePhysics().
+Drawing code does not change any physical values.
+
+This simulation is suitable for collecting internally consistent
+classroom data, but it must not be used to specify a real bore pump,
+PV array, controller, cable or electrical protection system.
+================================================================
+*/
+</script>
+
+</body>
+</html>
